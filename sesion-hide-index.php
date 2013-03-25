@@ -2,7 +2,8 @@
 
 
 
-  $ip = '';
+  	$ip = '';
+	
 	if(isset($_SERVER['REMOTE_ADDR'])) $ip = $_SERVER['REMOTE_ADDR'];
 
 	$sw = 0;
@@ -13,7 +14,7 @@
 			$sw = 1;										
 		}
 		
-		//echo('sesion: '. $_COOKIE['access_ecodes']);
+	
 		
 		if(isset($_COOKIE['access_nombrecookie'])&&$_COOKIE['access_nombrecookie'] == 'tupasswordinventado') $sw = 1;	
 		
