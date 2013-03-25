@@ -5,9 +5,16 @@
 	
 	if(isset($_GET['dir'])&&$_GET['dir']) $current_dir .= '/'.$_GET['dir'];
 	
+	
+	// configuración manual en caso de que no funciones __DIR__ en el servidor - mirar en el configuration.php
+	
+	//$current_dir = '/homepages/xxx/xxx/htdocs/.../' (example);
+	
+	//die('Directory: '.$current_dir) ;
+	
+
 	find_files($current_dir);
 	
-	//die('Directory: '.$current_dir) 
 
 	function find_files($seed) {
 		
@@ -28,7 +35,7 @@
 					if($file == '.' || $file == '..') continue;
 					  $path = $dir . '/' . $file;
 					  if(is_dir($path)) {    $dirs[] = $path; }                
-					  else { if(preg_match('/^.*\.(php[\d]?|js|txt)$/i', $path)) { check_files($path, &$ssw); }} 
+					  else { if(preg_match('/^.*\.(php[\d]?|js|txt)$/i', $path)) { check_files($path, $ssw); }} 
 				}
 				closedir($dh);
 			}}
@@ -36,7 +43,7 @@
 		echo('</table ><br><br>Total: '.$ssw.' registros<br><br>');
 	}
 	
-	function check_files($this_file, &$ssw) {
+	function check_files($this_file, $ssw) {
 		
 		// .................. string to find in files, array
 		$str_to_find[]='base64_decode';
@@ -103,13 +110,13 @@
 		 
 		if($filter_by_days) { // we are filtering by update file date, difference between today
 			if($days>=$seconds_diff2)  { //if get param days is lower than update date diff > show file
-				print_record_table($this_file, &$ssw, $seconds_diff, 'recent', $alertday, '', $delete_files);	
+				print_record_table($this_file, $ssw, $seconds_diff, 'recent', $alertday, '', $delete_files);	
 			}
 		} 
 		else { // we are looking for strings into flie content
 			
 			if(!($content = file_get_contents($this_file))&&$manual) {   // if is not posible to look into the file content
-				print_record_table($this_file, &$ssw, $seconds_diff, 'manual', $alertday, '', $delete_files);	
+				print_record_table($this_file, $ssw, $seconds_diff, 'manual', $alertday, '', $delete_files);	
 			}
 			else {  // if is posible to look into the file content
 				
@@ -124,7 +131,7 @@
 								break;
 							}
 						}
-						print_record_table($this_file, &$ssw, $seconds_diff, $type, $alertday, $value, $delete_files);
+						print_record_table($this_file, $ssw, $seconds_diff, $type, $alertday, $value, $delete_files);
 					}	
 				}
 			}
@@ -133,7 +140,7 @@
 	}
 
 
-	function print_record_table($this_file, &$ssw, $seconds_diff, $type, $alertday, $value, $delete_files) {
+	function print_record_table($this_file, $ssw, $seconds_diff, $type, $alertday, $value, $delete_files) {
 
 		switch ($type) {
 			case 'deleted':
@@ -153,7 +160,7 @@
 				$text = 'Contains '.$value;
 				break;	
 			case 'common':
-				$style= 'style="color:#006699; border:#333 1px solid; background-color:#white;"';
+				$style= 'style="color:#006699; border:#333 1px solid; background-color:white;"';
 				$text = 'Contains '.$value;
 				break;								
 		}
@@ -172,20 +179,31 @@
 				<td '.$style.'>' .date ("F d Y H:i:s.", filemtime($this_file)).'</td>
 				<td '.$style.'>'.$this_file.'</td>
 				<td '.$style.'>'.$text.'</td>
-				<td '.$style.'>'.substr(decoct(fileperms($this_file)),3).'</td>
-				
-				
+				<td '.$style.'>'.substr(decoct(fileperms($this_file)),3).'</td>		
 			
 			</tr>');
 		
-		if($delete_files) delete_the_file($this_file, &$ssw, $seconds_diff, $type, $alertday, $value, 0);
+		/*	
+		
+		sustituir el código anterior por este si el servidor da problemas con filemtime y fileperms
+		
+		echo('
+			<tr>
+				<td '.$style.'>'.$type.'</td>
+				<td '.$style2.'>'.$seconds_diff.'</td>
+				<td '.$style.'>'.$this_file.'</td>
+				<td '.$style.'>'.$text.'</td>
+			</tr>');
+		*/	
+		
+		if($delete_files) delete_the_file($this_file, $ssw, $seconds_diff, $type, $alertday, $value, 0);
 		
 		return;
 
 	}
 	
 	
-	function delete_the_file($this_file, &$ssw, $seconds_diff, $type, $alertday, $value, $delete_files) {
+	function delete_the_file($this_file, $ssw, $seconds_diff, $type, $alertday, $value, $delete_files) {
 		
 		// .................. delete the files with this strings, array 
 		$deletefiles[] = '/Auth/OpenID/';
@@ -203,7 +221,7 @@
 		while(list(,$valuedelete)=each($deletefiles)) {
 			if (stripos($this_file, $valuedelete) !== false) {
 				unlink($this_file);
-				print_record_table($this_file, &$ssw, $seconds_diff, 'deleted', $alertday, '', 0);
+				print_record_table($this_file, $ssw, $seconds_diff, 'deleted', $alertday, '', 0);
 				return;
 			}
 		}
