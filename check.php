@@ -1,17 +1,22 @@
 <html><head><title>Check scrpit</title></head><body>
 <?php 
 
-  $current_dir = __DIR__;
+  	$current_dir = __DIR__;
+	
 	if(isset($_GET['dir'])&&$_GET['dir']) $current_dir .= '/'.$_GET['dir'];
 	
 	find_files($current_dir);
-
+	
+	//die('Directory: '.$current_dir) 
 
 	function find_files($seed) {
 		
 		$ssw = 0;
 		
-		if(! is_dir($seed)) return false;
+		if(! is_dir($seed)) { 
+			echo 'No directory found at:' . $seed;
+			return false;
+		}
 		$files = array();
 		$dirs = array($seed);
 	  
